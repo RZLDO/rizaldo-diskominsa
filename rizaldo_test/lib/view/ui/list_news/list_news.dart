@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:rizaldo_test/data/data_aceh_jaya.dart';
+import 'package:rizaldo_test/model/News_item.dart';
 import 'package:rizaldo_test/view/ui/component/card_component.dart';
 import 'package:rizaldo_test/view/ui/component/carousel.dart';
 import 'package:rizaldo_test/view/ui/component/title_section.dart';
@@ -11,6 +13,13 @@ class ListNewsScreen extends StatefulWidget {
 }
 
 class _ListNewsScreenState extends State<ListNewsScreen> {
+  Future<List<NewsItem>?>? newsFuture;
+  @override
+  void initState() {
+    super.initState();
+    newsFuture = fetchNews();
+  }
+
   @override
   Widget build(BuildContext context) {
     final urlImage = [
@@ -27,18 +36,32 @@ class _ListNewsScreenState extends State<ListNewsScreen> {
               const Padding(
                   padding: EdgeInsets.only(left: 16),
                   child: TitleSection(width: 40, text: "Berita Kami")),
-              ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 5,
-                  itemBuilder: (context, index) {
-                    return const CardListComponent(
-                        imageSrc:
-                            "https://s-img.mgid.com/g/17125364/984x656/-/aHR0cDovL2NsLmltZ2hvc3RzLmNvbS9pbWdoL2ltYWdlL2ZldGNoL2FyXzM6MixjX2ZpbGwsZV9zaGFycGVuOjEwMCxmX2pwZyxnX2ZhY2VzOmF1dG8scV9hdXRvOmdvb2Qsd18xMDIwL2h0dHA6Ly9pbWdob3N0cy5jb20vdC8yMDIzLTA5LzgyMDExNC80YjQ0MmNjYzYwMDkxODJkYWYzZmY1ZGM3NjI1YTdjOC5qcGVn.webp?v=1716793023-ueJhLw5NTnm0h8oA4XAbhdeGzSnCZ9rNGqPlKaIO5-8",
-                        subtitle: "init subtitle",
-                        title: "title",
-                        date: "23-24-21");
-                  }),
+              FutureBuilder<List<NewsItem>?>(
+                  future: newsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No news found.'));
+                    } else {
+                      final newsItems = snapshot.data!;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: newsItems.length,
+                        itemBuilder: (context, index) {
+                          final newsItem = newsItems[index];
+                          return CardListComponent(
+                              imageSrc: newsItem.imageUrl,
+                              subtitle: newsItem.description,
+                              title: newsItem.title,
+                              date: newsItem.date);
+                        },
+                      );
+                    }
+                  })
             ],
           ),
         ),

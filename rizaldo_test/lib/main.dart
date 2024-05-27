@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rizaldo_test/view/navigation/main_navigation.dart';
-import 'package:rizaldo_test/view/ui/list_news/list_news.dart';
 
 void main() {
   runApp(const MyApp());
